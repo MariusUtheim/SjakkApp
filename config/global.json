@@ -1,0 +1,14 @@
+{
+  "global": {
+    "parseVersion": "1.4.2"
+  },
+  "applications": {
+    "Ulf": {
+      "applicationId": "0NkZxSv180JSfRrQLMi1IJQ5ZkJNcEWfXQWYUMRJ",
+      "masterKey": "GTWbUKpqeyv0ArFFoSnZnlPp4S609HXfPW2OEvKg"
+    },
+    "_default": {
+      "link": "Ulf"
+    }
+  }
+}
