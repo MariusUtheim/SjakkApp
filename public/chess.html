@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <title>Sjakkapp test</title>
+      <link rel="stylesheet" href="css/global.css">
+      <link rel="stylesheet" href="css/chessboard-0.3.0.min.css">
+   </head>
+   
+   <body>
+
+
+      <div id="content">
+         <div id="board" style="width: 600px"></div>
+      </div>
+
+      <div class="floater">
+
+         <ul class="tabs">
+            <li class="tab-link current" data-tab="tabUserlist">Brukere pålogget</li>
+            <li class="tab-link" data-tab="tabChat">Chat</li>
+         </ul>
+
+
+         <div id="tabUserlist" class="tab-content current">
+            <ul class="userlist">
+            </ul>
+         </div>
+
+
+         <div id="tabChat" class="tab-content">
+            
+            <div id="messages">
+            </div>
+
+            <input type="text" id="txtMessage">
+            <input type="submit" id="cmdMessage">
+
+         </div>
+
+      </div>
+
+      <button id="cmdDialog" class="md-trigger" data-modal="modal-1">Dialog</button>
+      <!-- modal dialog box --> 
+      <div class="md-modal" id="modal-1">
+         <div class="md-content">
+            <h3>Welcome to checkmate</h3>
+            <div>
+               <p>This appears to be the first time you're playing check with checkmate. Please choose a login option.</p>
+               <button class="md-close">Close me!</button>
+            </div>
+         </div>
+      </div>
+      <div class="md-overlay"></div>
+
+
+   </body>
+
+   <script src="js/jquery-1.11.2.min.js"></script>
+   <script src="js/jquery-ui.min.js"></script>
+   <script src="js/chessboard-0.3.0.min.js"></script>
+   <script src="js/chess.min.js"></script>
+   <script src="https://cdn.pubnub.com/pubnub-dev.js"></script>
+
+   <script type="text/javascript">
+
+   // Some basic configuration
+
+   var CHANNEL = "chess"
+   var PN = PUBNUB
+   var USERS = []
+   var COLORS = ['white', 'black']
+   var SELF = {
+      'color': 0,
+      'uuid': "Anonymous"
+   }
+   // Let's just get a random user id.
+   var UUID = PN.db.get('session') || (function() {
+      //var uuid = PN.uuid();
+      var uuid = "Gjest" + Math.floor(Math.random() * 101);
+      PN.db.set('session', uuid);
+      return uuid;
+   })();
+
+   // Set up pub nub 
+    var pn = PN.init({
+        publish_key: 'pub-c-cfc130e1-ad89-4333-a51f-abd7138a06ee',
+        subscribe_key: 'sub-c-61984dba-f0d1-11e4-82cc-02ee2ddab7fe',
+        uuid: UUID
+    });
+
+    function color2class(color) {
+      if (color > 1) return "spectator"
+      return COLORS[color]
+    }
+
+   function rm_user(uuid) {
+      occupancy = USERS.length
+      for (index = 0; index < occupancy; index++) {
+         if (USERS[index].uuid == uuid) {
+            USERS.slice(index, 1)
+            return 1
+         }
+      }
+      return 0
+   }
+
+   function user_color(uuid) {
+      occupancy = users.length
+      for (index = 0; index < occupancy; index++) {
+         if (USERS[index].uuid == uuid) {
+            return USER[index].color
+         }
+      }
+   }
+   pn.subscribe({
+       channel: CHANNEL,
+       restore: true,
+       presence: function(m) {
+         switch(m.action) {
+            case "join":
+               console.log(JSON.stringify(m))
+               var color = USERS.length
+               var user = {
+                  "uuid": m.uuid,
+                  "color": color
+               }
+               if (!~USERS.indexOf(m.uuid)) { USERS.push(user) }
+
+               var dom_user = document.createElement('li')
+               $(dom_user).data('uuid', m.uuid)
+               if (m.uuid == UUID) {
+                  SELF.color = color
+                  SELF.uuid = UUID
+                  $(dom_user).addClass("self")
+               }
+               $(dom_user).addClass(color2class(color))
+               $(dom_user).html(m.uuid)
+               $("ul.userlist").append(dom_user)
+               break;
+            case "leave", "timeout":
+               rm_user(m.uuid)
+               $("ul.userlist").find("li[data-uuid='" + m.uuid + "']").remove()
+               break;
+         }
+       },
+       message: function(m) {
+         switch(m.command) {
+            case "CHAT":
+               if (typeof m.uuid !== undefined) {
+                  $("#messages").append("<b>" + m.uuid + "</b>> " + m.text + "<br>")   
+               }            
+               break
+            case "DRAGDROP":
+               board.position(m.newpos)
+               chess.move({from: m.source, to: m.target})
+               break
+         }
+
+       }
+   });
+
+
+$(document).ready(function(){
+   
+   $('ul.tabs li').click(function(){
+      var tab_id = $(this).attr('data-tab');
+      $('ul.tabs li').removeClass('current');
+      $('.tab-content').removeClass('current');
+      $(this).addClass('current');
+      $("#"+tab_id).addClass('current');
+   })
+
+   $(".floater").draggable({handle: "ul.tabs"})
+
+   $("#cmdMessage").click(function() {
+      message = $("#txtMessage").val()
+      if (!message.trim().length) return
+      pn.publish({
+          channel: CHANNEL,
+          message: {"command": "CHAT", "uuid": UUID, "text": message }
+      });
+      $("#txtMessage").val("")
+   })
+
+   $("#txtMessage").on('keypress', function(e) {
+      if (e.which == 13) { $("#cmdMessage").trigger('click') }
+   })
+
+})
+
+$("#cmdDialog").bind('click', function() {
+   $("#modal-1").addClass('md-show')
+})
+$("button.md-close").bind('click', function() {
+   $("#modal-1").removeClass('md-show')
+})
+
+var chess = new Chess()
+
+var board = new ChessBoard('board', {
+   draggable: true,
+   onDragStart: function(source, piece, position, orientation) {
+      var t = chess.turn()
+      return (COLORS[SELF.color][0] == t && t == piece[0])
+   },
+   onDrop: function(source, target, piece, newpos, oldpos, orientation) {
+
+      if ((move = chess.move({
+         from: source,
+         to: target,
+         promotion: 'q'
+      })) === null) return 'snapback'
+
+      pn.publish({
+         channel: CHANNEL, 
+         message: {
+            "command": "DRAGDROP",
+            "newpos": newpos,
+            "source": source,
+            "target": target,
+         }
+      })
+   }
+});
+
+board.start()
+
+
+
+   </script>
+</html>
