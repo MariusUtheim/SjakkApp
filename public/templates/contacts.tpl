@@ -11,7 +11,7 @@
 				    </thead>
 					<tbody>
 				    	{{#each player}}
-				    	<tr data-id="{{{id}}}">
+				    	<tr data-id="{{{id}}}" data-username={{attributes.username}}>
 				    		<td>{{{attributes.nickname}}}</td>
 				    		<td><button class="btn btn-default" id="cmdPlayOpponent">Play</button></td>
 				        </tr>
