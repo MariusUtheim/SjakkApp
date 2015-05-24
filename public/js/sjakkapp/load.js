@@ -20,7 +20,7 @@ Sjakkapp.load = function(game) {
     // Subscribe to the pubnub channel for this game.
     Sjakkapp.pn.subscribe({
         channel: game.id,
-        message: function(message, env, ch) { Sjakkapp.message(message, env, ch) },
+        message: function(message, env, ch) { Sjakkapp.network(message, env, ch) },
         ssl: true
     })    
     

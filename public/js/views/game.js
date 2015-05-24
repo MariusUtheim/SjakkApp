@@ -6,11 +6,30 @@ $(document).on("templateLoaded", function(event, template) {
     JST['Game'] = Parse.View.extend({
         template: Handlebars.compile($('#game-tpl').html()),   
         events: {
-            "click #cmdChat": "chat"
+            "click #cmdChat": "toggleChat",
+            "keypress #btn-input": "chat"
         },
-        chat: function(e) {
+        toggleChat: function(e) {
             e.preventDefault()
             $(".chatpanel").toggle()
+        },
+        chat: function(e) {
+            var keycode = (typeof e.which == "number") ? e.which : e.keyCode;
+            var content = $(e.target).val()
+
+            if (keycode == 13 && content.length) {
+                Sjakkapp.pn.publish({
+                    channel: $("#board").data('game'),
+                    message: {
+                        user: Parse.User.current().get('nickname'),
+                        command: 'CHAT',
+                        content: content
+                    }
+                })
+                e.preventDefault()
+                $(e.target).val("")
+            }
+            
         },
         initialize: function() {
             this.render()

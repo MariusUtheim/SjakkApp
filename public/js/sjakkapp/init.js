@@ -16,6 +16,13 @@ Sjakkapp.init = function() {
         uuid: Parse.User.current()
     });    
 
+    // We'll use this channel for communicating between users outside of games.
+    Sjakkapp.pn.subscribe({
+        channel: Parse.User.current().get('username'),
+        message: function(message, env, ch) { Sjakkapp.network(message, env, ch) },
+        ssl: true
+    })
+
     // Let's build a query to download all active games from the Parse DB. 
     var qWhite = new Parse.Query("Game")  // We're looking for all games in which the current user is playing white
     var qBlack = new Parse.Query("Game")  // ....or black

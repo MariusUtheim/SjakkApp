@@ -37,6 +37,7 @@ Sjakkapp.start = function(game) {
                 channel: id,
                 message: {
                     sender: Parse.User.current().get('username'),
+                    command: 'MOVE',
                     move: {from: source, to: target}
                 }
             })

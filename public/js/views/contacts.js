@@ -45,6 +45,16 @@ $(document).on("templateLoaded", function(event, template) {
             }).then(function(game) {
                 Sjakkapp.load(game)
                 new JST['Game']({ game: game })
+
+                Sjakkapp.pn.publish({
+                    channel: game.opponent.get('username'),
+                    message: {
+                        user: Parse.User.current().get('nickname'),
+                        command: 'GAME',
+                        game: game.id
+                    }
+                })
+
             })
 
 
