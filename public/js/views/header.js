@@ -19,6 +19,7 @@ $(document).on("templateLoaded", function(event, template) {
         },
         nav: function(e) {
             e.preventDefault()
+            new JST['Loading']
             var dest = $(e.target).attr('id').substr(3)
             new JST[dest]({model: Parse.User.current()})
             $(e.target).parent().siblings().removeClass('active')

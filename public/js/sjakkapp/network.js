@@ -3,7 +3,6 @@ window.Sjakkapp = window.Sjakkapp || {}
 // message.
 Sjakkapp.network = function(msg, env, id) {
 
-    console.log(msg + " " + id)
     // Disregard invalid messages (i.e.: messages lacking a command or user parameter). 
     if (typeof msg.command === 'undefined') return
     if (typeof msg.user === 'undefined') return
@@ -17,16 +16,19 @@ Sjakkapp.network = function(msg, env, id) {
     switch(msg.command) {
 
         case "MOVE":
-        
             if (msg.user == Parse.User.current().get('username')) return  // Disgard our own messages.
             if (typeof msg.move === 'undefined') return                   // Move command with no move?
             game.Chess.move({from: msg.move.from, to: msg.move.to})
             game.set('Turn', game.Chess.turn())
             game.set('State', game.Chess.fen())
             game.increment('Moves')
+
             var board = $("#board")
+
             if (board.length && board.data('game') == id) {
                 game.Board.position(game.Chess.fen())
+            } else if (Sjakkapp.currentView == "games") { 
+                new JST['Games']({model: Parse.User.current()}) 
             }
             break
         
@@ -35,6 +37,9 @@ Sjakkapp.network = function(msg, env, id) {
             query.include("White", "Black")
             query.get(msg.game).then(function(game) {
                 Sjakkapp.load(game)
+                if (Sjakkapp.currentView == "games") { 
+                    new JST['Games']({model: Parse.User.current()}) 
+                }
             })
             break
         

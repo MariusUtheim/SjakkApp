@@ -7,6 +7,7 @@ Sjakkapp.init = function() {
     Sjakkapp.Games = new Parse.Collection()
     Sjakkapp.Board = ""
     Sjakkapp.Chess = ""
+    Sjakkapp.currentView = ""
 
     // Set up PUBNUB. We have to do this before initializing any games, because otherwise they wouldn't be able
     // to properly set up their channel subscriptions. 
@@ -33,7 +34,7 @@ Sjakkapp.init = function() {
     query = new Parse.Query.or(qWhite, qBlack)  // Combine both query objects into one
     query.notEqualTo('Gameover', true)          // Let's exclude inactive games
     query.include("White", "Black")             // Also fetch player information (e.g. username, nickname, etc.)
-    query.descending("updatedAt")
+    query.ascending("updatedAt")
 
     var Games = Parse.Collection.extend({
         model: "Game",
@@ -47,7 +48,8 @@ Sjakkapp.init = function() {
             games.each(function(game) { 
                 Sjakkapp.load(game)
             })
+            new JST['Games']
         }
     })
 
-}()
+}

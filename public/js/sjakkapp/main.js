@@ -70,8 +70,8 @@ JST['Loading'] = Parse.View.extend({
 $(document).on("templatesLoaded", function() {
     if (Parse.User.current()) {
         new JST['Header']({model: Parse.User.current()})
-        new JST['Games']({model: Parse.User.current()})
         Parse.User.current().set('lastLogin', new Date())
+        Sjakkapp.init()
     } else {
         new JST['Login']
     }

@@ -16,89 +16,27 @@ $(document).on("templateLoaded", function(event, template) {
             new JST['Game']({game: game})
         },
         initialize: function() {
-
-            if (typeof this.collection === 'undefined') {
-
-                var Game = Parse.Object.extend("Game")
-
-                var qWhite = new Parse.Query(Game)
-                var qBlack = new Parse.Query(Game)
-
-                qWhite.equalTo('White', Parse.User.current())
-                qBlack.equalTo('Black', Parse.User.current())
-                
-                query = new Parse.Query.or(qWhite, qBlack)
-                query.include("White", "Black")
-                query.descending("updatedAt")
-
-                var Games = Parse.Collection.extend({
-                    model: Game,
-                    query: query
-                })
-
-                var games = new Games()
-
-                games.fetch({
-                    success:function(games) {
-                        var View = new JST['Games']({ collection: games, model: Parse.User.current() })
-                        View.render()
-                    },
-                    error:function(games, error) {
-                        console.log(error.message)
-                    }
-                })
-                
-                /*
-                games.fetch().then(function(results) { 
-                    console.log(results.length) 
-                    return Parse.Cloud.run('getGameTime', { Game: Sjakkapp.Game.id, createdAt: Sjakkapp.Game.createdAt })
-                }).then(function(results) {
-                    console.log(results)
-                })
-                */
-            }
+            Sjakkapp.currentView = "games"
+            this.render()
         },
         render: function() {
-            $(document).trigger('templateChange')            
-            var game = this.collection.toJSON()
+            $(document).trigger('templateChange')
+
+            // Because of limitations in handlebars' variable logic, we need to do some preprocessing of the game object
+            // before performing variable substitutions and rendering the page. We'll iterate through every active game 
+            // in reverse order (so the most recent games will show up on top) and add a few properties to make them
+            // available to handlebars.
+            var game = []                       // this will be an array holding all our active games.
+            var games = Sjakkapp.Games          // quick-reference.
             
-            for (i =0, l = game.length; i < l; i++) {
-                b = this.collection.models[i].attributes.Black
-                w = this.collection.models[i].attributes.White
-                c = "White"
-                c2 = 'w'
-                o = b
-
-                if (Parse.User.current().get('username') != w.get('username')) {
-                    c = "Black"
-                    c2 = 'b'
-                    o = w
-                }
-
-                if (this.collection.models[i].get('Turn') == c2) {
-                    game[i].isItMyTurn = true
-                    s = "Your turn"
-                } else {
-                    game[i].isItMyTurn = false
-                    s = "Opponent's turn"
-                }
-
-                if (this.collection.models[i].get('Gameover')) {
-                    s = "Game over"
-                    game[i].isItMyTurn = false
-                }
-                //game[i].Black.username = b.get('username')
-                //game[i].White.username = w.get('username')
-
-                game[i].Black = b.toJSON()
-                game[i].White = w.toJSON()
-                game[i].Opponent = o.toJSON()
-                game[i].Color = c
-                game[i].State = s
-
+            for (var i = games.length-1; i >= 0; i--) {
+                game.push(games.at(i).toJSON())
+                game[game.length-1].Opponent = games.at(i).opponent.get("nickname")
+                game[game.length-1].Turn = (games.at(i).get("Turn") == Sjakkapp.Games.at(i).currentColor)
+                game[game.length-1].White = (games.at(i).currentColor == "w")
             }
 
-            var context = { game: game, user: this.model.toJSON()}
+            var context = { game: game, user: Parse.User.current().toJSON() }
             this.$el.html(this.template(context))
             $("#content").html(this.el)
         }

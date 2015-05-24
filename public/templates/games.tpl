@@ -16,7 +16,7 @@
 				    	{{#each game}}
 				    	<tr data-id="{{{objectId}}}" {{#if isItMyTurn}}class="success"{{/if}}>
 				    		<td><a class="game" href="">{{Opponent.nickname}}</a></td>
-				    		<td>{{Color}}</td>
+				    		<td>{{currentColor}}</td>
 				    		<td>{{Moves}}</td>
 				    		<td>{{State}}</td>
 				        	<td class="visible-md-inline-block visible-lg-inline-block">{{{createdAt}}}</td>
