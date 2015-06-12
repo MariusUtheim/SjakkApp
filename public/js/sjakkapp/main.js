@@ -35,7 +35,7 @@ $(document).ready(function() {
 
     $("script:empty[type='text/template']").each(function() {
         var id = $(this).attr('id')
-        var path = 'templates/' + id.replace('-', '.')
+        var path = 'templates/' + id.substr(0, id.length-4) + ".tpl"
         
         $.ajax({
             url: path, 

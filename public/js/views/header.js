@@ -27,9 +27,11 @@ $(document).on("templateLoaded", function(event, template) {
         },        
         logout: function(e) {
             e.preventDefault()
+            Sjakkapp.Social.broadcast("QUIT")
             Parse.User.logOut()
             $("#header").empty()
             new JST['Login']()
+            location.reload(true)
         },        
         initialize: function() {
             this.render()

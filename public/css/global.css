@@ -9,7 +9,9 @@
   margin-top:5px;
 }
 
-
+td.online {
+  color:green;
+}
 .form-signin,.form-signup {
     max-width: 330px;
     padding: 15px;

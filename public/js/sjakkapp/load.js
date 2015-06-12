@@ -15,13 +15,15 @@ Sjakkapp.load = function(game) {
         game.opponent = game.get('White')
     }
 
-    Sjakkapp.Games.add(game)
+    var index = Sjakkapp.Games.add(game).length - 1
 
     // Subscribe to the pubnub channel for this game.
     Sjakkapp.pn.subscribe({
         channel: game.id,
         message: function(message, env, ch) { Sjakkapp.network(message, env, ch) },
         ssl: true
-    })    
-    
+    })
+
+    return index
+
 }

@@ -13,8 +13,8 @@ Parse.Cloud.beforeSave("Game", function(request, response) {
 		request.object.set('Moves', 0)
 		request.object.set('Gameover', false)
 		request.object.set('createdBy', Parse.User.current())
-        request.object.set('Turn', 'w')
-        request.object.set('State', "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+		request.object.set('Turn', 'w')
+		request.object.set('State', "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 
 	} else {
 
@@ -35,8 +35,6 @@ Parse.Cloud.beforeSave("Game", function(request, response) {
 
 	}
 
-	Parse.User.current().set('lastActivity', new Date())
-	Parse.User.current().save()
 	response.success()
 
 })

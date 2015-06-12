@@ -17,9 +17,10 @@ $(document).on("templateLoaded", function(event, template) {
      
             Parse.User.logIn(username, password, {
                 success: function(user) {
+                    Sjakkapp.init()
                     new JST['Header']({model: user})
                     new JST['Loading']({model: user})
-                    new JST['Games']({model: user})                    
+                    new JST['Games']({model: user})
                 },
                 error: function(user, error) {
                     $("#content").find("input[name='email']").parent().addClass('has-error')

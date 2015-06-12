@@ -21,7 +21,8 @@ $(document).on("templateLoaded", function(event, template) {
                 Sjakkapp.pn.publish({
                     channel: $("#board").data('game'),
                     message: {
-                        user: Parse.User.current().get('nickname'),
+                        user: Parse.User.current().id,
+                        nickname: Parse.User.current().get('nickname'),
                         command: 'CHAT',
                         content: content
                     }
@@ -32,6 +33,7 @@ $(document).on("templateLoaded", function(event, template) {
             
         },
         initialize: function() {
+            Sjakkapp.currentView = "game"
             this.render()
         },
         render: function() {

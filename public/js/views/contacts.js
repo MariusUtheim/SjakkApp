@@ -9,12 +9,14 @@ $(document).on("templateLoaded", function(event, template) {
             "click #cmdPlayOpponent": "playOpponent"
         },
         playOpponent: function(e) {
-            new JST['Loading']()
-            var opponent = $(e.target).parent().parent().data('id')
-            Sjakkapp.new(opponent)
+            e.preventDefault()
+            var opponent = $(e.target).closest("tr").data('id')
+            var gametype = parseInt($(e.target).parent().find("select").val())
+            Sjakkapp.new(opponent, gametype)
         },
         initialize: function() {
             Sjakkapp.currentView = "contacts"
+            /*
             if (typeof this.collection !== 'undefined') { return }
             var query = new Parse.Query("User")
 
@@ -22,17 +24,24 @@ $(document).on("templateLoaded", function(event, template) {
 
             query.find({
                 success: function(players) {
+                    players.forEach(function(player) {
+                        player.isFriend = Sjakkapp.Social.isFriend(player.id)
+                        player.isOnline = Sjakkapp.Social.isOnline(player.id)
+                    })
                     var View = new JST['Contacts']({model: Parse.User.current(), collection: players})
                     View.render()
                 }
             })
+            */
+
+            this.render()
         },
         render: function() { 
             $(document).trigger('templateChange')
-            if (typeof this.collection !== 'undefined') {
-                var context = { player: this.collection, user: this.model.toJSON() }
+            if (Sjakkapp.Social.friends.length) {
+                var context = { player: Sjakkapp.Social.annotatedFriends(), user: Parse.User.current().toJSON() }
             } else {
-                var context = { user: this.model.toJSON() }
+                var context = { user: Parse.User.current().toJSON() }
             }
             this.$el.html(this.template(context));
             $("#content").html(this.el);

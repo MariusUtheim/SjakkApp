@@ -29,13 +29,16 @@ $(document).on("templateLoaded", function(event, template) {
             var game = []                       // this will be an array holding all our active games.
             var games = Sjakkapp.Games          // quick-reference.
             
-            for (var i = games.length-1; i >= 0; i--) {
-                game.push(games.at(i).toJSON())
-                game[game.length-1].Opponent = games.at(i).opponent.get("nickname")
-                game[game.length-1].Turn = (games.at(i).get("Turn") == Sjakkapp.Games.at(i).currentColor)
-                game[game.length-1].White = (games.at(i).currentColor == "w")
+            if (games && games.length) {
+                for (var i = games.length-1; i >= 0; i--) {
+                    game.push(games.at(i).toJSON())
+                    game[game.length-1].Opponent = games.at(i).opponent.get("nickname")
+                    game[game.length-1].opponentId = games.at(i).opponent.id
+                    game[game.length-1].Turn = (games.at(i).get("Turn") == Sjakkapp.Games.at(i).currentColor)
+                    game[game.length-1].White = (games.at(i).currentColor == "w")
+                    game[game.length-1].isOnline = Sjakkapp.Social.isOnline(games.at(i).opponent.id)
+                }
             }
-
             var context = { game: game, user: Parse.User.current().toJSON() }
             this.$el.html(this.template(context))
             $("#content").html(this.el)
